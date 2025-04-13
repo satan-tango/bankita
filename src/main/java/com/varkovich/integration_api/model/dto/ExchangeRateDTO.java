@@ -5,14 +5,13 @@ import lombok.Data;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.sql.Timestamp;
 import java.util.Map;
 
 @Component
 @Scope("prototype")
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ExchangeRatesDTO {
+public class ExchangeRateDTO {
 
     private long timestamp;
 

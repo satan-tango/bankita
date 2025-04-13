@@ -11,26 +11,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-
-@Entity
+@Entity(name = "transaction_limit_exceeded_flag ")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(exclude = "id")
-public class ExchangeRates {
+public class ExceededTransactionLimit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Timestamp datetime;
+    private Long transactionId;
 
-    private String currencyPair;
+    private Long limitId;
 
-    private BigDecimal close;
-
-    private BigDecimal previousClose;
+    private Boolean limitExceeded;
 }

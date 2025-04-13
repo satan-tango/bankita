@@ -6,7 +6,7 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import com.varkovich.integration_api.config.ExchangeRatesConfig;
 import com.varkovich.integration_api.exception.ExchangeRateApiException;
-import com.varkovich.integration_api.model.dto.ExchangeRatesDTO;
+import com.varkovich.integration_api.model.dto.ExchangeRateDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +19,18 @@ public class CurrencyApiClient {
 
     private final ExchangeRatesConfig exchangeRatesConfig;
 
-    private ExchangeRatesDTO exchangeRatesDTO;
+    private ExchangeRateDTO exchangeRateDTO;
 
-    public Optional<ExchangeRatesDTO> getExchangeRates() throws ExchangeRateApiException {
+    public Optional<ExchangeRateDTO> getExchangeRates(String currencyShortName) throws ExchangeRateApiException {
         OkHttpClient client = new OkHttpClient();
 
         StringBuilder url = new StringBuilder();
         url.append(exchangeRatesConfig.getUri());
         url.append("?app_id=");
         url.append(exchangeRatesConfig.getApiKey());
-        url.append("&base=USD&symbols=RUB%2CBYN%2CKZT&prettyprint=false&show_alternative=false");
+        url.append("&base=USD");
+        url.append("&symbols=" + currencyShortName);
+        url.append("&prettyprint=false&show_alternative=false");
 
 
         Request request = new Request.Builder()
@@ -42,8 +44,8 @@ public class CurrencyApiClient {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                exchangeRatesDTO = objectMapper.readValue(response.body().string(), ExchangeRatesDTO.class);
-                return Optional.of(exchangeRatesDTO);
+                exchangeRateDTO = objectMapper.readValue(response.body().string(), ExchangeRateDTO.class);
+                return Optional.of(exchangeRateDTO);
             } else {
                 throw new ExchangeRateApiException("Received a bad response from the exchange rate API.");
             }

@@ -15,6 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -51,5 +52,6 @@ public class Transaction {
     @Size(min = 3, max = 3, message = "Currency must consist of 3 characters.")
     private String currencyShortName;
 
-    private Timestamp created_at;
+    @CreationTimestamp
+    private Timestamp transactionTimestamp;
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class TransactionController {
 
     @PostMapping()
     public ResponseEntity<TransactionResponseDTO> transaction(@RequestBody @Valid Transaction transaction,
-                                                              BindingResult bindingResult) throws ValidationException, ExchangeRateApiException {
+                                                              BindingResult bindingResult) throws ValidationException, ExchangeRateApiException, AccountNotFoundException {
         if (bindingResult.hasErrors()) {
             List<String> messages = new ArrayList<>();
             for (ObjectError allError : bindingResult.getAllErrors()) {

@@ -1,34 +1,52 @@
 package com.varkovich.integration_api.service;
 
-import com.varkovich.integration_api.client.CurrencyApiClient;
-import com.varkovich.integration_api.dao.ExchangeRatesDAO;
 import com.varkovich.integration_api.exception.ExchangeRateApiException;
-import com.varkovich.integration_api.model.ExchangeRates;
+import com.varkovich.integration_api.model.ExceededTransactionLimit;
+import com.varkovich.integration_api.model.ExchangeRate;
+import com.varkovich.integration_api.model.Limit;
 import com.varkovich.integration_api.model.Transaction;
+import com.varkovich.integration_api.model.dto.LimitDTO;
 import com.varkovich.integration_api.model.dto.TransactionResponseDTO;
+import com.varkovich.integration_api.repository.ExceededTransactionLimitRepository;
+import com.varkovich.integration_api.repository.TransactionRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.login.AccountNotFoundException;
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class TransactionService {
 
-    private final CurrencyApiClient currencyApiClient;
-
     private final ExchangeRatesService exchangeRatesService;
 
-    public Optional<TransactionResponseDTO> executeTransaction(Transaction transaction) throws ExchangeRateApiException {
-        //  Optional<ExchangeRatesDTO> exchangeRates = currencyApiClient.getExchangeRates();
+    private final LimitService limitService;
 
-        Optional<ExchangeRates> exchangeRate = exchangeRatesService.findLatestExchangeRateByCurrencyPair("USD-BYN");
-        if (exchangeRate.isEmpty()) {
-            //TODO получить данные через API, обновить базу, предоставить курс валют
-        }
+    private final TransactionRepository transactionRepository;
 
-        //TODO сравниваю входит ли в сутки, если да, использую этот курс, если нет, делаю запрос, обновляю базу
-        System.out.println("dfsfsd");
+    private final AccountService accountService;
+
+    private final ExceededTransactionLimitRepository exceededTransactionLimitRepository;
+
+    // @Transactional(rollbackOn = Exception.class)
+    public Optional<TransactionResponseDTO> executeTransaction(Transaction transaction) throws ExchangeRateApiException, AccountNotFoundException {
+        accountService.accountVerification(transaction.getAccountFrom());
+        transactionRepository.save(transaction);
+        ExchangeRate exchangeRate = exchangeRatesService.getExchangeRate(transaction.getCurrencyShortName());
+        BigDecimal sumInUsd = transaction.getSum().divide(exchangeRate.getClose(), 2, BigDecimal.ROUND_HALF_UP);
+        Limit accountLimit = limitService.getUpdatedRemainigAccountLimit(transaction.getAccountFrom(), sumInUsd, transaction.getCategory());
+        ExceededTransactionLimit exceededTransactionLimit = ExceededTransactionLimit.builder()
+                .transactionId(transaction.getId())
+                .limitId(accountLimit.getId())
+                .limitExceeded(accountLimit.getLimitRemaining().compareTo(BigDecimal.ZERO) >= 0 ? false : true)
+                .build();
+        exceededTransactionLimitRepository.save(exceededTransactionLimit);
+        System.out.println(sumInUsd);
         return null;
     }
+
+
 }

@@ -14,8 +14,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ExchangeRateApiException.class)
-    public ResponseEntity validationException(ExchangeRateApiException e) {
+    public ResponseEntity exchangeRateApiException(ExchangeRateApiException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccountNotFoundException.class)
+    public ResponseEntity accountNotFoundException(ExchangeRateApiException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
 
