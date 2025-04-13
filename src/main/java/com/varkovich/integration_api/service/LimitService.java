@@ -2,7 +2,6 @@ package com.varkovich.integration_api.service;
 
 import com.varkovich.integration_api.model.Account;
 import com.varkovich.integration_api.model.Limit;
-import com.varkovich.integration_api.model.dto.LimitDTO;
 import com.varkovich.integration_api.repository.AccountRepository;
 import com.varkovich.integration_api.repository.LimitRepository;
 import lombok.AllArgsConstructor;
@@ -31,7 +30,7 @@ public class LimitService {
             throw new AccountNotFoundException(accountNumber);
         }
 
-        Optional<Limit> limitFromDB = limitRepository.findByAccountIdAndCategory(account.get().getId(), category);
+        Optional<Limit> limitFromDB = limitRepository.findByAccountIdAndCategoryAndLatestLimitTimestamp(account.get().getId(), category);
         if (limitFromDB.isEmpty()) {
             Limit defaultLimit = Limit.builder()
                     .accountId(account.get().getId())

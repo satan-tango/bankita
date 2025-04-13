@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,12 +39,8 @@ public class TransactionController {
             throw new ValidationException(messages.stream().collect(Collectors.joining("\n")));
         }
 
-        Optional<TransactionResponseDTO> transactionResponseDTO = transactionService.executeTransaction(transaction);
+        TransactionResponseDTO transactionResponseDTO = transactionService.executeTransaction(transaction);
 
-        if (transactionResponseDTO.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-
-        return new ResponseEntity<>(transactionResponseDTO.get(), HttpStatus.OK);
+        return new ResponseEntity<>(transactionResponseDTO, HttpStatus.OK);
     }
 }
